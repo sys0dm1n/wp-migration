@@ -2,8 +2,6 @@
 #
 # Written by Terraltech - 2013
 #
-# version: BETA
-#
 
 #------------------------------------------------------------------
 # current info
@@ -28,7 +26,13 @@ read -p "current Database User?: " CUR_DB_USER
 
 read -p "current Database Password?: " CUR_DB_PASS
 
+s1="empty"
+while [ -z "$s1"] || [ $s1 != "/" ]
+do
 read -p "current website DocumentRoot Path?: " CUR_PATH
+s1=$(echo $CUR_PATH | sed -e 's/\(^.*\)\(.$\)/\2/')
+done
+
 echo ""
 echo "######################################################"
 echo "#							 #"
@@ -54,8 +58,16 @@ read -p "Remote DataBase ROOT password: " DB_ROOT_PASS
 
 read -p "What is the User name of the remote server?: " NEW_USER
 read -p "What is the IP address of the remote server?: " NEW_IP_HOST
-read -p "What is the private key full path of the remote server? [/default/path/ServerKey]: " NEW_PK
-[ -z "$NEW_PK" ] && NEW_PK=/default/path/ServerKey
+
+NEW_PK="empty"
+while [ ! -f $NEW_PK ]
+do
+read -p "What is the private key full path of the remote server? [/root/wp-migration/Key_client]: " NEW_PK
+[ -z "$NEW_PK" ] && NEW_PK=/root/wp-migration/Key_client
+echo "$NEW_PK"
+done
+echo "$NEW_PK"
+
 echo ""
 echo "##########################################################"
 echo "Current URL: $CUR_URL				"
@@ -119,6 +131,7 @@ case "$choice" in
 		# Restoring database on remote server
 		#------------------------------------------------------------------
 		ssh -i $NEW_PK $NEW_USER@$NEW_IP_HOST "mysql -u root -p${DB_ROOT_PASS} ${NEW_DB_NAME} < ${CUR_PATH}mysqlbackup.sql"
+		echo "DB created and restored!"
 		;;
 	n|N )
 		echo "exit"
